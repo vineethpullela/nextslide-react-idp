@@ -1,8 +1,11 @@
-import NextSildes from './components/NextSlides'
-
+import {Component} from 'react'
 import './App.css'
+import Header from './components/Header'
+import NewButton from './components/NewButton'
+import Slides from './components/Slides'
 
-// This is the list used in the application. You can move them to any component needed.
+import SlideContext from './Context'
+
 const initialSlidesList = [
   {
     id: 'cc6e1752-a063-11ec-b909-0242ac120002',
@@ -41,11 +44,85 @@ const initialSlidesList = [
   },
 ]
 
+const insert = (arr, index, newItem) => [
+  ...arr.slice(0, index),
+  newItem,
+  ...arr.slice(index),
+]
+
 // Replace your code here
-const App = () => (
-  <>
-    <NextSildes />
-  </>
-)
+
+class App extends Component {
+  state = {
+    initialList: initialSlidesList,
+    activeIndex: 0,
+  }
+
+  changeHeading = value => {
+    const {activeIndex} = this.state
+    this.setState(prevState => {
+      const {initialList} = prevState
+      const newList = initialList.map((eachItem, index) => {
+        if (activeIndex === index) {
+          return {...eachItem, heading: value}
+        }
+        return eachItem
+      })
+      return {initialList: newList}
+    })
+  }
+
+  ChangeDescription = value => {
+    const {activeIndex} = this.state
+    this.setState(prevState => {
+      const {initialList} = prevState
+      const newList = initialList.map((eachItem, index) => {
+        if (activeIndex === index) {
+          return {...eachItem, description: value}
+        }
+        return eachItem
+      })
+      return {initialList: newList}
+    })
+  }
+
+  changeActiveTab = index => {
+    this.setState({activeIndex: index})
+  }
+
+  addNewItem = item => {
+    const {activeIndex} = this.state
+    this.setState(prevState => {
+      const {initialList} = prevState
+      const newList = insert(initialList, activeIndex + 1, item)
+      return {initialList: [...newList]}
+    })
+  }
+
+  render() {
+    const {initialList, activeIndex} = this.state
+    console.log(activeIndex)
+    return (
+      <div>
+        <Header />
+        <SlideContext.Provider
+          value={{
+            initialList,
+            activeIndex,
+            changeActiveTab: this.changeActiveTab,
+            addNewItem: this.addNewItem,
+            changeHeading: this.changeHeading,
+            ChangeDescription: this.ChangeDescription,
+          }}
+        >
+          <>
+            <NewButton />
+            <Slides />
+          </>
+        </SlideContext.Provider>
+      </div>
+    )
+  }
+}
 
 export default App
